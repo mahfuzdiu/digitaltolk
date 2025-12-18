@@ -1,0 +1,39 @@
+services:
+  translation-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: translation_api
+    restart: unless-stopped
+    working_dir: /var/www/html
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/var/www/html
+      - /var/www/html/vendor
+    depends_on:
+      - db
+    networks:
+      - translation-service-network
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: translation_db
+      POSTGRES_USER: db_user
+      POSTGRES_PASSWORD: db_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - translation-service-network
+
+volumes:
+  postgres_data:
+networks:
+  translation-service-network:
+    driver: bridge
