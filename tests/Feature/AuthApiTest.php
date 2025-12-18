@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 class AuthApiTest extends TestCase
 {
-    use RefreshDatabase;
     /**
      * A basic feature test example.
      */
@@ -17,7 +16,7 @@ class AuthApiTest extends TestCase
     {
         $response = $this->postJson('/api/register', [
             'name' => 'name',
-            'email' => 'email@gmail.com',
+            'email' => 'email' . rand(1, 10) .'@gmail.com',
             'password' => '12345678',
             'password_confirmation' => '12345678',
             'phone' => '01956874125',
@@ -32,16 +31,17 @@ class AuthApiTest extends TestCase
      */
     public function test_login()
     {
+        $rand = rand(1, 10);
         User::factory()->create([
             'name' => 'name',
-            'email' => 'email@gmail.com',
+            'email' => 'email' . $rand . '@gmail.com',
             'password' => '12345678',
             'phone' => '01956874125',
             'role' => 'admin'
         ]);
 
         $response = $this->postJson('/api/login', [
-            'email' => 'email@gmail.com',
+            'email' => 'email' . $rand . '@gmail.com',
             'password' => '12345678'
         ]);
 

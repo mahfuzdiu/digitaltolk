@@ -1,0 +1,409 @@
+openapi: 3.0.0
+info:
+  title: Translation Management API
+  version: 1.0.0
+  description: API for retrieving and managing multi-language translation keys.
+
+servers:
+  - url: http://localhost:8000
+    description: Local Development Server
+
+tags:
+  - name: Authentication
+  - name: Translation Operations
+
+paths:
+  /api/register:
+    post:
+      summary: Register a new user
+      description: Create a new account by providing user details and assigning a role.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+                - password_confirmation
+              properties:
+                name:
+                  type: string
+                  example: "Mahfuzur Rahman"
+                email:
+                  type: string
+                  format: email
+                  example: "mahfuz.dev@gmail.com"
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "12345678"
+                password_confirmation:
+                  type: string
+                  format: password
+                  example: "12345678"
+                role:
+                  type: string
+                  enum: [admin, user, editor]
+                  example: "admin"
+                phone:
+                  type: string
+                  example: "+8801768094971"
+      responses:
+        "201":
+          description: User registered successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User registered successfully."
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 101
+                      name:
+                        type: string
+                      email:
+                        type: string
+                      role:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+        "422":
+          description: Validation error (e.g., email already exists or passwords do not match).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The email has already been taken."
+                  errors:
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: string
+
+  /api/login:
+    post:
+      tags:
+        - Authentication
+      summary: User Login
+      description: Authenticate user credentials and return an API token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "mahfuz.dev@gmail.com"
+                password:
+                  type: string
+                  format: password
+                  example: "12345678"
+      responses:
+        "200":
+          description: Login successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+                  token:
+                    type: string
+                    example: "2|Jis7zL2HVZKyV4g5njJwP5i7AJdJkQD1gEodziMz60ca9bec"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid credentials"
+
+  /api/translations:
+    get:
+      tags:
+        - Translation Operations
+      summary: List all translations
+      description: Returns a paginated list of translations filtered by locale or tags or content.
+      parameters:
+        - name: key
+          in: query
+          description: Filter by the translation key (partial or full match).
+          schema:
+            type: string
+          example: "button"
+        - name: tag
+          in: query
+          description: Filter by context tag (e.g., mobile, android, v2).
+          schema:
+            type: string
+          example: "mobile"
+        - name: content
+          in: query
+          description: Search within the translated text value.
+          schema:
+            type: string
+          example: "login"
+        - name: page
+          in: query
+          description: The page number for pagination.
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  current_page:
+                    type: integer
+                    example: 1
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        translation_key:
+                          type: string
+                        locale:
+                          type: string
+                        translated_value:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        context_tag:
+                          type: array
+                          items:
+                            type: string
+                        content_vector:
+                          type: string
+                  next_page_url:
+                    type: string
+                    nullable: true
+                  path:
+                    type: string
+                  per_page:
+                    type: integer
+                  prev_page_url:
+                    type: string
+                    nullable: true
+                  to:
+                    type: integer
+                  total:
+                    type: integer
+
+  /api/translation/store:
+    post:
+      tags:
+        - Translation Operations
+      summary: Store a new translation
+      description: Create a new translation entry in the database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - translation_key
+                - locale
+                - translated_value
+              properties:
+                translation_key:
+                  type: string
+                  example: "auth.login_button"
+                locale:
+                  type: string
+                  example: "en"
+                translated_value:
+                  type: string
+                  example: "Sign In to Your Account"
+                context_tag:
+                  type: array
+                  items:
+                    type: string
+                  example: ["mobile"]
+      responses:
+        "201":
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 2
+                  translation_key:
+                    type: string
+                  locale:
+                    type: string
+                  translated_value:
+                    type: string
+                  context_tag:
+                    type: array
+                    items:
+                      type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+
+  /api/translation/update/{translation_id}:
+    put:
+      tags:
+        - Translation Operations
+      summary: Update an existing translation
+      parameters:
+        - name: translation_id
+          in: path
+          required: true
+          description: The unique ID of the translation to update.
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                translation_key:
+                  type: string
+                  example: "auth.login_button"
+                locale:
+                  type: string
+                  example: "en"
+                translated_value:
+                  type: string
+                  example: "Sign In to Your Account please"
+                context_tag:
+                  type: array
+                  items:
+                    type: string
+                  example: ["mobile", "web"]
+      responses:
+        "200":
+          description: Translation updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  translation_key:
+                    type: string
+                  locale:
+                    type: string
+                  translated_value:
+                    type: string
+                  context_tag:
+                    type: array
+                    items:
+                      type: string
+                  updated_at:
+                    type: string
+                    format: date-time
+        "404":
+          description: Translation ID not found
+
+  /api/translation/{translation_id}:
+    get:
+      tags:
+        - Translation Operations
+      summary: Get a single translation
+      description: Retrieve detailed information for a specific translation entry.
+      parameters:
+        - name: translation_id
+          in: path
+          required: true
+          description: The unique ID of the translation.
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Successful retrieval of the translation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  translation_key:
+                    type: string
+                    example: "key.01KCRTGP73KHC0FRJEMDTJD62D"
+                  locale:
+                    type: string
+                    example: "de"
+                  translated_value:
+                    type: string
+                    example: "Ut repellendus aliquam harum distinctio hic sit aut assumenda."
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2025-12-18T13:31:15.000000Z"
+                  updated_at:
+                    type: string
+                    format: date-time
+                    example: "2025-12-18T13:31:15.000000Z"
+                  context_tag:
+                    type: array
+                    items:
+                      type: string
+                    example: ["android", "v2"]
+                  content_vector:
+                    type: string
+                    example: "'aliquam':3 'assumenda':9 'aut':8 'distinctio':5 'harum':4 'hic':6 'repellendus':2 'sit':7 'ut':1"
+        "404":
+          description: Translation not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Translation not found"

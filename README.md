@@ -2,57 +2,21 @@
 
 ## Run Using Docker
 
-1. Git pull project and go inside project-management-system directory
+1. Git pull project and go inside digitaltolk directory
 ```angular2html
-git pull git@github.com:mahfuzdiu/project-management-system.git
-```
-2. Setup SMTP (mailchimp preferred) for testing in .env.example
-```angular2html
-MAIL_USERNAME=mailtrap_username
-MAIL_PASSWORD=mailtrap_password
+git pull git@github.com:mahfuzdiu/digitaltolk.git
 ```
 
-3. Run below docker command. Wait a bit then visit ```http://localhost:8000/``` to check if the project is running
+2. Run below docker command. Wait a bit then visit ```http://localhost:8000/``` to check if the project is running
 ```angular2html
 docker compose up -d
 ```
 
-4. Run following command before testing email notification on ```tasks/{id}```
+3. Run following command from terminal to run test
 ```angular2html
-docker compose exec app php artisan queue:work
+docker compose exec translation-service php artisan test
 ```
 
+4. Postman collection [link](https://automatedpro-4694.postman.co/workspace/AutomatedPro-Workspace~9b69f21a-6ee8-4421-8799-4ad3e782085e/collection/10198154-ca6222f8-acea-46b0-a46d-2bf46728912b?action=share&creator=10198154&active-environment=10198154-5d9604f3-296a-4278-af61-85ad8a7e65d1) 
 
-## Run Using Xamp
-
-### 1. Install [Xamp 8.2](https://www.apachefriends.org/download.html) and run apache and mysql
-
-### 2. Set php in environment file
-
-### 3. Create database
-```angular2html
-create a database: pms
-username: root
-password:
-```
-4. Run the following commands
-```angular2html
-# git pull git@github.com:mahfuzdiu/project-management-system.git
-# composer install
-# php artisan key:generate
-# php artisan migrate
-# php artisan db:seed
-# php artisan serve
-```
-### 9. go to ```http://localhost:8000```
-### 10. To test email sending and job/queue I have used mailtrap tesing environment.
-
-Update the .env with smtp config.
-```angular2html
-MAIL_USERNAME=mailtrap_username
-MAIL_PASSWORD=mailtrap_password
-```
-
-RUN: ```php artisan queue:work``` from project directory
-
-mail will be working upon sending request on ```tasks/{id}``` api  
+5. ```Swagger``` documentation is available in ```doc``` folder
